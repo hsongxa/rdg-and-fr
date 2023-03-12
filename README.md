@@ -1,6 +1,8 @@
-# flux-reconstruction-schemes
-A modern C++ implementation of the Flux Reconstruction schemes parallelized with MPI + CUDA. This code solves the Euler equations and Compressible Navier-Stokes equations in 3D space on unstructured hexahedral meshes.
+# rdg-and-fr
+A C++ implementation of the robust discontinuous Galerkin (DG) method and the flux reconstruction schemes. This code focuses on the solution of compressible Euler equations and compressible Navier-Stokes equations in 3D space on unstructured hexahedral meshes. The parallelization is done by MPI + OpenMP + CUDA.
+
+Code is under construction.
 
 ## TODO
+- Curvilinear mapping to support curvilinear elements
 - Support of AMR (adaptive mesh refinement)
-- Support of meshes with mixed cell shapes (tet, hex, wedge, and pyramid)
