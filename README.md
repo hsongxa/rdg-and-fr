@@ -5,4 +5,6 @@ Code is under construction.
 
 ## TODO
 - Curvilinear mapping to support curvilinear elements
-- Support of AMR (adaptive mesh refinement)
+
+## Main References
+
