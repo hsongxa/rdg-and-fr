@@ -21,45 +21,28 @@
 #ifndef LEGENDRE_POLYNOMIALS_H
 #define LEGENDRE_POLYNOMIALS_H
 
-#include <cmath>
-#include <cstddef>
-
-#include "const_val.h"
+#include <cstddef> // size_t
+#include <cassert>
 
 namespace rdg {
 
 template<typename T>
-T gamma(T arg) { return std::tgamma(arg); }
-
-template<typename T>
-T sqrt(T arg) { return std::sqrt(arg); }
-
-template<typename T>
-T pow(T base, T exp) { return std::pow(base, exp); }
-
-template<typename T>
-T legendre_polynomial_value(T alpha, T beta, std::size_t n, T x)
+T legendre_polynomial_value(std::size_t n, T x)
 {
-  T a1 = alpha + const_val<T, 1>;
-  T b1 = beta + const_val<T, 1>;
-  T ab2 = alpha + beta + const_val<T, 2>;
+  assert(x >= static_cast<T>(-1) && x <= static_cast<T>(1));
 
-  T prev_prev_val = sqrt(gamma(ab2) / gamma(a1) / gamma(b1) / pow(const_val<T, 2>, a1 + beta));
+  T prev_prev_val = static_cast<T>(1);
   if (n == 0) return prev_prev_val;
 
-  T prev_val = (const_val<T, 1> / const_val<T, 2>) * prev_prev_val * sqrt((ab2 + const_val<T, 1>) / a1 / b1) * (ab2 * x + alpha - beta);
+  T prev_val = x;
   if (n == 1) return prev_val;
 
   T val;
-  T a_i = const_val<T, 2> / ab2 * sqrt((a1 + beta) * a1 * b1 / (ab2 - const_val<T, 1>) / (ab2 + const_val<T, 1>));
   for (std::size_t i = 1; i < n; ++i)
   {
-    T iab = const_val<T, 2> * i + alpha + beta;
-    T b_i = (alpha + beta) * (beta - alpha) / iab / (iab + const_val<T, 2>);
-    T a_n = const_val<T, 2> / (iab + const_val<T, 2>) * sqrt((i + const_val<T, 1>) * (i + a1 + beta) * (i + a1) * (i + b1) / (iab + const_val<T, 1>) / (iab + const_val<T, 3>));
-    val = ((x - b_i) * prev_val - a_i * prev_prev_val) / a_n;
+    val = (static_cast<T>(2 * i + 1) * prev_val * x - static_cast<T>(i) * prev_prev_val) /
+          static_cast<T>(i + 1);
 
-    a_i = a_n;
     prev_prev_val = prev_val;
     prev_val = val;
   }
@@ -68,84 +51,81 @@ T legendre_polynomial_value(T alpha, T beta, std::size_t n, T x)
 }
 
 template<typename T, typename OutputIterator>
-void legendre_polynomial_values(T alpha, T beta, std::size_t n, T x, OutputIterator it)
+void legendre_polynomial_values(std::size_t n, T x, OutputIterator it)
 {
-  T a1 = alpha + const_val<T, 1>;
-  T b1 = beta + const_val<T, 1>;
-  T ab2 = alpha + beta + const_val<T, 2>;
+  assert(x >= static_cast<T>(-1) && x <= static_cast<T>(1));
 
-  T prev_prev_val = sqrt(gamma(ab2) / gamma(a1) / gamma(b1) / pow(const_val<T, 2>, a1 + beta));
-  it = prev_prev_val;
+  T prev_prev_val = static_cast<T>(1);
+  *it++ = prev_prev_val;
   if (n == 0) return;
 
-  T prev_val = (const_val<T, 1> / const_val<T, 2>) * prev_prev_val * sqrt((ab2 + const_val<T, 1>) / a1 / b1) * (ab2 * x + alpha - beta);
-  it = prev_val;
+  T prev_val = x;
+  *it++ = prev_val;
   if (n == 1) return;
 
-  T a_i = const_val<T, 2> / ab2 * sqrt((a1 + beta) * a1 * b1 / (ab2 - const_val<T, 1>) / (ab2 + const_val<T, 1>));
   for (std::size_t i = 1; i < n; ++i)
   {
-    T iab = const_val<T, 2> * i + alpha + beta;
-    T b_i = (alpha + beta) * (beta - alpha) / iab / (iab + const_val<T, 2>);
-    T a_n = const_val<T, 2> / (iab + const_val<T, 2>) * sqrt((i + const_val<T, 1>) * (i + a1 + beta) * (i + a1) * (i + b1) / (iab + const_val<T, 1>) / (iab + const_val<T, 3>));
-    T val = ((x - b_i) * prev_val - a_i * prev_prev_val) / a_n;
-    it = val;
+    T val = (static_cast<T>(2 * i + 1) * prev_val * x - static_cast<T>(i) * prev_prev_val) /
+            static_cast<T>(i + 1);
+    *it++ = val;
 
-    a_i = a_n;
     prev_prev_val = prev_val;
     prev_val = val;
   }
 }
 
 template<typename T>
-T legendre_polynomial_derivative(T alpha, T beta, std::size_t n, T x)
+T legendre_polynomial_derivative(std::size_t n, T x)
 {
-  if (n == 0) return const_val<T, 0>;
+  assert(x >= static_cast<T>(-1) && x <= static_cast<T>(1));
 
-  T val = legendre_polynomial_value(alpha + const_val<T, 1>, beta + const_val<T, 1>, n - 1, x);
-  return sqrt(n * (n + alpha + beta + const_val<T, 1>)) * val;
+  if (x == static_cast<T>(1) || x == static_cast<T>(-1))
+    return n % 2 == 0 ? x * static_cast<T>(n * (n + 1)) / static_cast<T>(2) :
+                        static_cast<T>(n * (n + 1)) / static_cast<T>(2);
+
+  if (n == 0) return static_cast<T>(0);
+  if (n == 1) return static_cast<T>(1);
+
+  return (legendre_polynomial_value(n, x) * x - legendre_polynomial_value(n - 1, x)) *
+         static_cast<T>(n) / (x * x - static_cast<T>(1));
 }
 
 template<typename T, typename OutputIterator>
-void legendre_polynomial_derivatives(T alpha, T beta, std::size_t n, T x, OutputIterator it)
+void legendre_polynomial_derivatives(std::size_t n, T x, OutputIterator it)
 {
-  it = const_val<T, 0>;
-  if (n == 0) return;
-  
-  T input_alpha = alpha;
-  T input_beta = beta;
+  assert(x >= static_cast<T>(-1) && x <= static_cast<T>(1));
 
-  alpha = alpha + const_val<T, 1>;
-  beta = beta + const_val<T, 1>;
-  n = n - 1;
+  if (x == static_cast<T>(1) || x == static_cast<T>(-1))
+  {
+    for (std::size_t i = 0; i <= n; ++i)
+      *it++ = i % 2 == 0 ? x * static_cast<T>(i * (i + 1)) / static_cast<T>(2) :
+                           static_cast<T>(i * (i + 1)) / static_cast<T>(2);
+    return;
+  }
 
-  // repeat the code for evaluating values at the new (alpha, beta, n)
-  T a1 = alpha + const_val<T, 1>;
-  T b1 = beta + const_val<T, 1>;
-  T ab2 = alpha + beta + const_val<T, 2>;
-
-  T prev_prev_val = sqrt(gamma(ab2) / gamma(a1) / gamma(b1) / pow(const_val<T, 2>, a1 + beta));
-  it = sqrt(input_alpha + input_beta + const_val<T, 2>) * prev_prev_val;
+  *it++ = static_cast<T>(0);
   if (n == 0) return;
 
-  T prev_val = (const_val<T, 1> / const_val<T, 2>) * prev_prev_val * sqrt((ab2 + const_val<T, 1>) / a1 / b1) * (ab2 * x + alpha - beta);
-  it = sqrt(const_val<T, 2> * (const_val<T, 2> + input_alpha + input_beta + const_val<T, 1>)) * prev_val;
+  *it++ = static_cast<T>(1);
   if (n == 1) return;
 
-  T a_i = const_val<T, 2> / ab2 * sqrt((a1 + beta) * a1 * b1 / (ab2 - const_val<T, 1>) / (ab2 + const_val<T, 1>));
+  T prev_prev_val = static_cast<T>(1);
+  T prev_val = x;
   for (std::size_t i = 1; i < n; ++i)
   {
-    T iab = const_val<T, 2> * i + alpha + beta;
-    T b_i = (alpha + beta) * (beta - alpha) / iab / (iab + const_val<T, 2>);
-    T a_n = const_val<T, 2> / (iab + const_val<T, 2>) * sqrt((i + const_val<T, 1>) * (i + a1 + beta) * (i + a1) * (i + b1) / (iab + const_val<T, 1>) / (iab + const_val<T, 3>));
-    T val = ((x - b_i) * prev_val - a_i * prev_prev_val) / a_n;
-    it = sqrt((i + 2) * ((i + 2) + input_alpha + input_beta + const_val<T, 1>)) * val;
+    T val = (static_cast<T>(2 * i + 1) * prev_val * x - static_cast<T>(i) * prev_prev_val) /
+            static_cast<T>(i + 1);
 
-    a_i = a_n;
+    *it++ = (val * x - prev_val) * static_cast<T>(i + 1) / (x * x - static_cast<T>(1));
+
     prev_prev_val = prev_val;
     prev_val = val;
   }
 }
+
+template<typename T>
+T legendre_polynomial_l2_norm(std::size_t n)
+{ return static_cast<T>(2) / static_cast<T>(2 * n + 1); }
 
 }
 
