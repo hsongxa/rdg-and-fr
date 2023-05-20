@@ -29,7 +29,7 @@ int test_legendre_polynomials()
   using namespace rdg;
 
   constexpr int OrderMax = 40;
-  constexpr int N = 101;
+  constexpr int N = 501;
 
   double x[N];
   double delta = 2. / static_cast<double>(N - 1);

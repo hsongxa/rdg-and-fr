@@ -60,7 +60,7 @@ endif
 	$(NVCC) $(GPU_CARD) $(NVCC_FLAGS) $(INCL) $(CUDA_INCL) -c $< -o $@
 
 clean:	
-	rm -f $(OBJS) $(EXEC) *.o
+	rm -f $(OBJS) $(EXEC) *.o *.txt
 	
 .PHONY : all clean
 
