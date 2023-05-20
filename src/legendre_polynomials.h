@@ -86,8 +86,19 @@ T legendre_polynomial_derivative(std::size_t n, T x)
   if (n == 0) return static_cast<T>(0);
   if (n == 1) return static_cast<T>(1);
 
-  return (legendre_polynomial_value(n, x) * x - legendre_polynomial_value(n - 1, x)) *
-         static_cast<T>(n) / (x * x - static_cast<T>(1));
+
+  T prev_prev_val = static_cast<T>(1);
+  T prev_val = x;
+  for (std::size_t i = 1; i < n; ++i)
+  {
+    T val = (static_cast<T>(2 * i + 1) * prev_val * x - static_cast<T>(i) * prev_prev_val) /
+            static_cast<T>(i + 1);
+
+    if (i + 1 == n) return (val * x - prev_val) * static_cast<T>(i + 1) / (x * x - static_cast<T>(1));
+
+    prev_prev_val = prev_val;
+    prev_val = val;
+  }
 }
 
 template<typename T, typename OutputIterator>
