@@ -86,7 +86,6 @@ T legendre_polynomial_derivative(std::size_t n, T x)
   if (n == 0) return static_cast<T>(0);
   if (n == 1) return static_cast<T>(1);
 
-
   T prev_prev_val = static_cast<T>(1);
   T prev_val = x;
   for (std::size_t i = 1; i < n; ++i)
