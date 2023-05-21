@@ -19,6 +19,7 @@
  **/
 
 #include <iostream>
+
 #include "unittests.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -28,6 +29,9 @@ int main(int argc, char **argv) {
 
   if (test_legendre_polynomials())
     std::cout << "test_legendre_polynomials FAILED!!!" << std::endl;
+
+  if (test_gauss_lobatto_quadrature())
+    std::cout << "test_gauss_lobatto_quadrature FAILED!!!" << std::endl;
 
   // finish
   return 0;

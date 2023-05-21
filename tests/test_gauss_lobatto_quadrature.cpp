@@ -18,11 +18,31 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  **/
 
-#ifndef UNITTESTS_H
-#define UNITTESTS_H
+#include <vector>
+#include <iterator>
+#include <iostream>
 
-  int test_legendre_polynomials();
+#include "gauss_lobatto_quadrature.h"
 
-  int test_gauss_lobatto_quadrature();
+int test_gauss_lobatto_quadrature()
+{
+  using namespace rdg;
 
-#endif
+  std::vector<double> points;
+  std::vector<double> weights;
+
+  // Gauss-Lobatto quadrature
+  for(int np = 2; np < 8; ++np)
+  {
+    points.clear();
+    weights.clear();
+    gauss_lobatto_quadrature(np, std::back_inserter(points), std::back_inserter(weights));
+
+    std::cout << "Gauss-Lobatto quadrature of " << np << " points:" << std::endl;
+    for (std::size_t j = 0; j < points.size(); ++j)
+      std::cout << "p = " << points[j] << ", w = " << weights[j] << std::endl;
+  }
+  std::cout << std::endl;
+
+  return 0;
+}
