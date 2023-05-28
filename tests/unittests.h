@@ -25,4 +25,6 @@
 
   int test_gauss_lobatto_quadrature();
 
+  int test_lagrange_basis();
+
 #endif

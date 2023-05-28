@@ -26,6 +26,11 @@
 
 namespace rdg {
 
+// NOTE: This code is NOT used by tensor product elements, as their derivative
+// NOTE: matrices are directly computed from Lagrange polynomials. However,
+// NOTE: this is needed for simplex elements -- see the book of J. S. Hesthaven
+// NOTE: and T. Warburton, Sections 6.1 and 6.2.
+
 template<typename T>
 T legendre_polynomial_value(std::size_t n, T x)
 {
