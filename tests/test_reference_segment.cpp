@@ -20,25 +20,13 @@
 
 #include <iostream>
 
-#include "unittests.h"
+#include "reference_segment.h"
 
-////////////////////////////////////////////////////////////////////////////////
-// Program main
-////////////////////////////////////////////////////////////////////////////////
-int main(int argc, char **argv) {
+int test_reference_segment()
+{
+  using namespace rdg;
 
-//  if (test_legendre_polynomials())
-//    std::cout << "test_legendre_polynomials FAILED!!!" << std::endl;
-//
-//  if (test_gauss_lobatto_quadrature())
-//    std::cout << "test_gauss_lobatto_quadrature FAILED!!!" << std::endl;
-//
-//  if (test_lagrange_basis())
-//    std::cout << "test_lagrange_basis FAILED!!!" << std::endl;
+  reference_segment<double> rs(1);
 
-  if (test_reference_segment())
-    std::cout << "test_reference_segment FAILED!!!" << std::endl;
-
-  // finish
   return 0;
 }

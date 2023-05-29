@@ -33,12 +33,14 @@ template<typename T>
 class lagrange_basis
 {
 public:
+  lagrange_basis() {}
+
   template<typename InputItr>
   lagrange_basis(InputItr begin, InputItr end) : nodes(begin, end), weights(std::distance(begin, end), const_val<T, 1>)
   {
     assert(nodes.size() > 1);
 
-    // populate barycentric weightseights
+    // populate barycentric weights
     for (std::size_t i = 1; i < nodes.size(); ++i)
       for (std::size_t j = 0; j < i; ++j)
       {
@@ -49,6 +51,8 @@ public:
     for (std::size_t i = 0; i < weights.size(); ++i)
       weights[i] = const_val<T, 1> / weights[i];
   }
+
+  T node(std::size_t i) const { assert(i < nodes.size()); return nodes[i]; }
 
   T barycentric_weight(std::size_t i) const { assert(i < weights.size()); return weights[i]; }
 
