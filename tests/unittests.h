@@ -27,4 +27,6 @@
 
   int test_lagrange_basis();
 
+  int test_reference_segment();
+
 #endif

@@ -22,7 +22,6 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <iterator>
 
 #include "lagrange_basis.h"
 
