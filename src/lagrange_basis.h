@@ -23,6 +23,7 @@
 
 #include <cstddef> // size_t
 #include <vector>
+#include <algorithm>
 #include <cassert>
 
 #include "const_val.h"
@@ -36,21 +37,24 @@ public:
   lagrange_basis() {}
 
   template<typename InputItr>
-  lagrange_basis(InputItr begin, InputItr end) : nodes(begin, end), weights(std::distance(begin, end), const_val<T, 1>)
+  lagrange_basis(InputItr begin, InputItr end) : nodes(begin, end)
   {
     assert(nodes.size() > 1);
-
-    // populate barycentric weights
-    for (std::size_t i = 1; i < nodes.size(); ++i)
-      for (std::size_t j = 0; j < i; ++j)
-      {
-        assert(nodes[j] != nodes[i]); // nodes must all be distinct
-        weights[j] *= (nodes[j] - nodes[i]);
-        weights[i] *= (nodes[i] - nodes[j]);
-      }
-    for (std::size_t i = 0; i < weights.size(); ++i)
-      weights[i] = const_val<T, 1> / weights[i];
+    compute_barycentric_weights();
   }
+
+  template<typename InputItr>
+  void set_nodes(InputItr begin, InputItr end)
+  {
+    assert(std::distance(begin, end) > 1);
+
+    nodes.clear();
+    while (begin != end) nodes.push_back(*begin++);
+
+    compute_barycentric_weights();
+  }
+
+  std::size_t num_nodes() const { return nodes.size(); }
 
   T node(std::size_t i) const { assert(i < nodes.size()); return nodes[i]; }
 
@@ -105,6 +109,23 @@ public:
         coeff += (const_val<T, 1> / (x - nodes[j]));
       }
     return coeff * value(i, x);
+  }
+
+private:
+  void compute_barycentric_weights()
+  {
+    weights.resize(nodes.size());
+    std::fill(weights.begin(), weights.end(), const_val<T, 1>);
+
+    for (std::size_t i = 1; i < nodes.size(); ++i)
+      for (std::size_t j = 0; j < i; ++j)
+      {
+        assert(nodes[j] != nodes[i]); // nodes must all be distinct
+        weights[j] *= (nodes[j] - nodes[i]);
+        weights[i] *= (nodes[i] - nodes[j]);
+      }
+    for (std::size_t i = 0; i < weights.size(); ++i)
+      weights[i] = const_val<T, 1> / weights[i];
   }
 
 private:
