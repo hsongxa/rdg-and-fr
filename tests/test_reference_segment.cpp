@@ -26,7 +26,35 @@ int test_reference_segment()
 {
   using namespace rdg;
 
-  reference_segment<double> rs(1);
+  // linear element
+  reference_segment<double> rs1(1);
+  auto m_matrix = rs1.mass_matrix();
+  auto d_matrix = rs1.derivative_matrix_wrt_r();
+
+  std::cout << "M matrix: " << std::endl << m_matrix << std::endl;
+  std::cout << "D matrix: " << std::endl << d_matrix << std::endl;
+
+  // test the SBP property
+  auto sbp1 = m_matrix * d_matrix;
+  auto sbp2 = d_matrix.transpose() * m_matrix;
+  auto sbp = sbp1 + sbp2;
+
+  std::cout << "Summation by parts: " << std::endl << sbp << std::endl;
+
+  // high order element
+  reference_segment<double> rs6(6);
+  m_matrix = rs6.mass_matrix();
+  d_matrix = rs6.derivative_matrix_wrt_r();
+
+  std::cout << "M matrix: " << std::endl << m_matrix << std::endl;
+  std::cout << "D matrix: " << std::endl << d_matrix << std::endl;
+
+  // test the SBP property
+  sbp1 = m_matrix * d_matrix;
+  sbp2 = d_matrix.transpose() * m_matrix;
+  sbp = sbp1 + sbp2;
+
+  std::cout << "Summation by parts: " << std::endl << sbp << std::endl;
 
   return 0;
 }

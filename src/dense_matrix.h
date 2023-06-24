@@ -715,6 +715,29 @@ std::ostream& operator<<(std::ostream& out, const dense_matrix<T, CM, Alloc>& m)
   return out << '}' << std::endl;
 }
 
+// convenience functions
+
+template<typename T, bool CM>
+dense_matrix<T, CM> make_zero_matrix(std::size_t size)
+{
+  return dense_matrix<T, CM>(size, size, static_cast<T>(0));
+}
+
+template<typename T, bool CM>
+dense_matrix<T, CM> make_zero_matrix(std::size_t size_row, std::size_t size_col)
+{
+  return dense_matrix<T, CM>(size_row, size_col, static_cast<T>(0));
+}
+
+template<typename T, bool CM>
+dense_matrix<T, CM> make_identity_matrix(std::size_t size)
+{
+  dense_matrix<T, CM> identity(size, size, static_cast<T>(0));
+  for (std::size_t i = 0; i < size; ++i)
+    identity(i, i) = static_cast<T>(1);
+  return identity;
+}
+
 }
 
 #endif

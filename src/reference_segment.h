@@ -42,41 +42,52 @@ public:
     assert(order > 0);
 
     std::vector<T> nodes;
-    std::vector<T> weights;
     gauss_lobatto_quadrature(order + 1, std::back_inserter(nodes), std::back_inserter(weights));
-
-    lagrange_basis<T> constructed_basis(nodes.begin(), nodes.end());
-    basis = constructed_basis;
-    node_weights = weights;
+    basis.set_nodes(nodes.begin(), nodes.end());
   }
+
+  std::size_t num_nodes() const { return basis.num_nodes(); }
+
+  T node_position(std::size_t i) const { return basis.node(i); }
 
   template<typename OutputItr>
   void node_positions(OutputItr it) const;
 
   matrix_type mass_matrix() const;
 
-  matrix_type derivative_matrix() const;
+  matrix_type derivative_matrix_wrt_r() const;
 
 private:
   lagrange_basis<T> basis;
-  std::vector<T> node_weights; // quadrature weights
+  std::vector<T> weights; // quadrature weights
 };
 
 template<typename T> template<typename OutputItr>
 void reference_segment<T>::node_positions(OutputItr it) const
 {
+  for (std::size_t i = 0; i < num_nodes(); ++i)
+    *it++ = node_position(i);
 }
 
 template<typename T> 
 typename reference_segment<T>::matrix_type reference_segment<T>::mass_matrix() const
 {
-  return matrix_type();
+  std::size_t size = num_nodes();
+  matrix_type result = make_zero_matrix<T, false>(size);
+  for (std::size_t i = 0; i < size; ++i)
+    result(i, i) = weights[i];
+  return result;
 }
 
 template<typename T> 
-typename reference_segment<T>::matrix_type reference_segment<T>::derivative_matrix() const
+typename reference_segment<T>::matrix_type reference_segment<T>::derivative_matrix_wrt_r() const
 {
-  return matrix_type();
+  std::size_t size = num_nodes();
+  matrix_type result(size, size);
+  for (std::size_t j = 0; j < size; ++j)
+    for (std::size_t i = 0; i < size; ++i)
+      result(i, j) = basis.derivative_at_node(j, i);
+  return result;
 }
 
 }
