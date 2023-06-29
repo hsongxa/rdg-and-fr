@@ -29,4 +29,6 @@
 
   int test_reference_segment();
 
+  int test_mapping_segment();
+
 #endif

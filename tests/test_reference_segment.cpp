@@ -35,9 +35,9 @@ int test_reference_segment()
   std::cout << "D matrix: " << std::endl << d_matrix << std::endl;
 
   // test the SBP property
-  auto sbp1 = m_matrix * d_matrix;
-  auto sbp2 = d_matrix.transpose() * m_matrix;
-  auto sbp = sbp1 + sbp2;
+  auto s_matrix = m_matrix * d_matrix;
+  auto s_transpose = d_matrix.transpose() * m_matrix;
+  auto sbp = s_matrix + s_transpose;
 
   std::cout << "Summation by parts: " << std::endl << sbp << std::endl;
 
@@ -50,9 +50,9 @@ int test_reference_segment()
   std::cout << "D matrix: " << std::endl << d_matrix << std::endl;
 
   // test the SBP property
-  sbp1 = m_matrix * d_matrix;
-  sbp2 = d_matrix.transpose() * m_matrix;
-  sbp = sbp1 + sbp2;
+  s_matrix = m_matrix * d_matrix;
+  s_transpose = d_matrix.transpose() * m_matrix;
+  sbp = s_matrix + s_transpose;
 
   std::cout << "Summation by parts: " << std::endl << sbp << std::endl;
 

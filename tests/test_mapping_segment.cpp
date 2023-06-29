@@ -20,28 +20,26 @@
 
 #include <iostream>
 
-#include "unittests.h"
+#include "mapping_segment.h"
 
-////////////////////////////////////////////////////////////////////////////////
-// Program main
-////////////////////////////////////////////////////////////////////////////////
-int main(int argc, char **argv) {
+int test_mapping_segment()
+{
+  using namespace rdg;
 
-//  if (test_legendre_polynomials())
-//    std::cout << "test_legendre_polynomials FAILED!!!" << std::endl;
-//
-//  if (test_gauss_lobatto_quadrature())
-//    std::cout << "test_gauss_lobatto_quadrature FAILED!!!" << std::endl;
-//
-//  if (test_lagrange_basis())
-//    std::cout << "test_lagrange_basis FAILED!!!" << std::endl;
-//
-//  if (test_reference_segment())
-//    std::cout << "test_reference_segment FAILED!!!" << std::endl;
+  const double A = -2.;
+  const double B = -1.;
+  double x = -1.25;
+  double r = mapping_segment<double>::x_to_r(A, B, x);
+  std::cout << "in segment [-2, -1], x = -1.25 is mapped to r = " << r << std::endl;
 
-  if (test_mapping_segment())
-    std::cout << "test_mapping_segment FAILED!!!" << std::endl;
+  x = mapping_segment<double>::r_to_x(A, B, 0.5);
+  std::cout << "in segment [-2, -1], r = 0.5 is mapped to x = " << x << std::endl;
 
-  // finish
+  double J = mapping_segment<double>::J(A, B);
+  std::cout << "J of the segment [-2, -1] = " << J << std::endl;
+
+  std::cout << "contravariant basis of the segment [-2, -1] = ";
+  std::cout << mapping_segment<double>::contravariant_basis(A, B) << std::endl;
+
   return 0;
 }
