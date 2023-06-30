@@ -18,30 +18,32 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  **/
 
-#include <iostream>
+#ifndef MAPPING_SEGMENT
+#define MAPPING_SEGMENT
 
-#include "unittests.h"
+#include <cassert>
 
-////////////////////////////////////////////////////////////////////////////////
-// Program main
-////////////////////////////////////////////////////////////////////////////////
-int main(int argc, char **argv) {
+#include "const_val.h"
 
-//  if (test_legendre_polynomials())
-//    std::cout << "test_legendre_polynomials FAILED!!!" << std::endl;
-//
-//  if (test_gauss_lobatto_quadrature())
-//    std::cout << "test_gauss_lobatto_quadrature FAILED!!!" << std::endl;
-//
-//  if (test_lagrange_basis())
-//    std::cout << "test_lagrange_basis FAILED!!!" << std::endl;
-//
-//  if (test_reference_segment())
-//    std::cout << "test_reference_segment FAILED!!!" << std::endl;
+namespace rdg {
 
-  if (test_mapping_segment())
-    std::cout << "test_mapping_segment FAILED!!!" << std::endl;
+template<typename T>
+class mapping_segment
+{
+public:
+  static T x_to_r(T x0, T x1, T x)
+  { assert(x0 < x1); return (const_val<T, 2> * x - x0 - x1) / (x1 - x0); }
 
-  // finish
-  return 0;
+  static T r_to_x(T x0, T x1, T r)
+  { return ((const_val<T, 1> - r) * x0 + (const_val<T, 1> + r) * x1) / const_val<T, 2>; }
+
+  static T J(T x0, T x1) { return (x1 - x0) / const_val<T, 2>; }
+
+  static T contravariant_basis(T x0, T x1)
+  { assert(x0 < x1); return const_val<T, 2> / (x1 - x0); }
+};
+
 }
+
+#endif
+
