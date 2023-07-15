@@ -465,7 +465,7 @@ void dense_matrix<T, CM, Alloc>::gemv(value_type alpha, InputItr in_first, value
   {
     for (const_pointer p = Base::start(); p < Base::start() + m_stride; ++p)  
     {
-      value_type y = beta * (*inout_first);
+      auto y = beta * (*inout_first);
       InputItr x = in_first; 
       for (const_pointer q = p; q < Base::start() + Base::size(); ++x, q += m_stride)
         y += alpha * (*q) * (*x);
@@ -476,7 +476,7 @@ void dense_matrix<T, CM, Alloc>::gemv(value_type alpha, InputItr in_first, value
   {
     for (const_pointer p = Base::start(); p < Base::start() + Base::size(); p += m_stride)  
     {
-      value_type y = beta * (*inout_first);
+      auto y = beta * (*inout_first);
       InputItr x = in_first; 
       for (const_pointer q = p; q < p + m_stride; ++x, ++q)
         y += alpha * (*q) * (*x);
