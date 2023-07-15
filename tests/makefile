@@ -1,7 +1,7 @@
 DEBUG ?= 1
 
 SRC_DIR := ../src
-SRC_MSH_DIR := ../mesh
+SRC_MSH_DIR := 
 VPATH := $(SRC_DIR):$(SRC_MSH_DIR)
 
 # CUDA root path
