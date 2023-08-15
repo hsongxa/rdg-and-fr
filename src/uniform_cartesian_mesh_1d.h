@@ -27,13 +27,14 @@
 
 namespace rdg {
 
+// a simple implementation of 1D mesh for testing purposes
 template<typename T>
 class uniform_cartesian_mesh_1d
 {
 public:
   using point_type = T;
 
-  uniform_cartesian_mesh_id(T x0, T x1, std::size_t n) : m_x0(x0), m_n(n)
+  uniform_cartesian_mesh_1d(T x0, T x1, std::size_t n) : m_x0(x0), m_n(n)
   {
     assert(x0 < x1 && n > 0);
     m_delta = (x1 - x0) / static_cast<T>(n);
@@ -43,10 +44,10 @@ public:
 
   std::size_t num_cells() const { return m_n; }
 
-  point_type get_vertex(std::size_t i) const { return x0 + i * m_delta; }
+  point_type get_vertex(std::size_t i) const { return m_x0 + i * m_delta; }
 
   std::tuple<point_type, point_type> get_cell(std::size_t i) const
-  { return std::make_tuple(x0 + i * m_delta, x0 + (i + 1) * m_delta); }
+  { return std::make_tuple(m_x0 + i * m_delta, m_x0 + (i + 1) * m_delta); }
 
 private:
   T m_x0;

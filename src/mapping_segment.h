@@ -27,18 +27,21 @@
 
 namespace rdg {
 
-template<typename T>
 class mapping_segment
 {
 public:
+  template<typename T>
   static T x_to_r(T x0, T x1, T x)
   { assert(x0 < x1); return (const_val<T, 2> * x - x0 - x1) / (x1 - x0); }
 
+  template<typename T>
   static T r_to_x(T x0, T x1, T r)
   { return ((const_val<T, 1> - r) * x0 + (const_val<T, 1> + r) * x1) / const_val<T, 2>; }
 
+  template<typename T>
   static T J(T x0, T x1) { return (x1 - x0) / const_val<T, 2>; }
 
+  template<typename T>
   static T contravariant_basis(T x0, T x1)
   { assert(x0 < x1); return const_val<T, 2> / (x1 - x0); }
 };

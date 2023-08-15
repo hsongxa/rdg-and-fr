@@ -39,26 +39,26 @@ void axpy_n(T a, ConstItr x_cbegin, std::size_t x_size, ConstItr y_cbegin, Itr o
 }
 
 // fourth-order explicit Runge-Kutta scheme
-template <typename Itr, typename T, typename DiscreteOp, typename Axpy>
-void rk4(Itr inout, std::size_t size, T t, T dt, const DiscreteOp& op, const Axpy& axpy, Itr wk0, Itr wk1, Itr wk2, Itr wk3, Itr wk4)
+template <typename Itr, typename T, typename DiscreteOp>
+void rk4(Itr inout, std::size_t size, T t, T dt, const DiscreteOp& op, Itr wk0, Itr wk1, Itr wk2, Itr wk3, Itr wk4)
 {
   T half = const_val<T, 1> / const_val<T, 2>;
 
   op(inout, size, t, wk1);
 
-  axpy(half * dt, wk1, size, inout, wk0);
+  axpy_n(half * dt, wk1, size, inout, wk0);
   op(wk0, size, t + half * dt, wk2);
 
-  axpy(half * dt, wk2, size, inout, wk0);
+  axpy_n(half * dt, wk2, size, inout, wk0);
   op(wk0, size, t + half * dt, wk3);
 
-  axpy(dt, wk3, size, inout, wk0);
+  axpy_n(dt, wk3, size, inout, wk0);
   op(wk0, size, t + dt, wk4);
 
-  axpy(const_val<T, 2>, wk2, size, wk1, wk0);
-  axpy(const_val<T, 2>, wk3, size, wk4, wk1);
-  axpy(dt / const_val<T, 6>, wk0, size, inout, wk2);
-  axpy(dt / const_val<T, 6>, wk1, size, wk2, inout);
+  axpy_n(const_val<T, 2>, wk2, size, wk1, wk0);
+  axpy_n(const_val<T, 2>, wk3, size, wk4, wk1);
+  axpy_n(dt / const_val<T, 6>, wk0, size, inout, wk2);
+  axpy_n(dt / const_val<T, 6>, wk1, size, wk2, inout);
 }
 
 }

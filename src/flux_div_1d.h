@@ -81,7 +81,7 @@ void flux_div_1d<REFE, FLUX>::apply(ZipItr ins, FItr surf_fluxes, T J, ZipItr ou
     for(std::size_t j = i + 1; j < N; ++j)
       vol_fluxes[i * N + j] = m_flux_op->numerical_volume_flux(*(ins + i), *(ins + j));
 
-    V result = make_zero_variable<V>();
+    V result = initialize_variable_to_zero<V>();
     for(std::size_t j = 0; j < N; ++j)
       result += const_val<T, 2> * D(i, j) * vol_fluxes[i * N + j];
 

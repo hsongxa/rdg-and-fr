@@ -21,32 +21,37 @@
 #ifndef VARIABLE_H
 #define VARIABLE_H 
 
-#include <tuple> // TODO: change to std::tuple when zip_iterators become standard
+#include <tuple>
 
 #include "const_val.h"
 
 namespace rdg {
 
-template<typename... Types>
-using tuple = std::tuple<Types...>; // TODO: change to std::tuple when zip_iterators become standard
-
+// see https://www.fluentcpp.com/2017/08/15/function-templates-partial-specialization-cpp
+// this technique, due to Simon Brand, is used to overload return types, i.e., functions
+// with no arguments
+template<typename T>
+struct type {};
 
 template<typename T>
-T make_zero_variable() { return const_val<T, 0>; }
+T initialize_variable_to_zero(type<T>) { return const_val<T, 0>; }
 
-template<typename tuple<T, T, T>>
-tuple<T, T, T> make_zero_variable()
+template<typename T>
+std::tuple<T, T, T> initialize_variable_to_zero(type<std::tuple<T, T, T>>)
 { return std::make_tuple(const_val<T, 0>, const_val<T, 0>, const_val<T, 0>); }
 
-template<typename tuple<T, T, T, T>>
-tuple<T, T, T, T> make_zero_variable()
+template<typename T>
+std::tuple<T, T, T, T> initialize_variable_to_zero(type<std::tuple<T, T, T, T>>)
 { return std::make_tuple(const_val<T, 0>, const_val<T, 0>, const_val<T, 0>, const_val<T, 0>); }
 
-template<typename tuple<T, T, T, T, T>>
-tuple<T, T, T, T, T> make_zero_variable()
+template<typename T>
+std::tuple<T, T, T, T, T> initialize_variable_to_zero(type<std::tuple<T, T, T, T, T>>)
 { return std::make_tuple(const_val<T, 0>, const_val<T, 0>, const_val<T, 0>, const_val<T, 0>, const_val<T, 0>); }
 
-// TODO: add overloads for other possible variable types here...
+// TODO: add more overloads, even for boost_tuples...
+
+template<typename T>
+T initialize_variable_to_zero() { return initialize_variable_to_zero(type<T>()); }
 
 }
 
