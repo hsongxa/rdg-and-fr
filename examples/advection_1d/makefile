@@ -1,6 +1,6 @@
 DEBUG ?= 1
 
-SRC_DIR := ../src
+SRC_DIR := ../../src
 SRC_MSH_DIR := 
 VPATH := $(SRC_DIR):$(SRC_MSH_DIR)
 
@@ -41,7 +41,7 @@ SRCS := $(wildcard *.cpp) $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(SRC_MSH_DIR)
 OBJS := $(patsubst %.cpp, %.o, $(notdir $(SRCS)))
 
 # =========== build  ===========
-EXEC := test
+EXEC := advection_1d
 CUDA_LINK_OBJ := cuLink.o
 
 all: $(EXEC)
