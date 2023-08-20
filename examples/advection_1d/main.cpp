@@ -40,8 +40,8 @@ double compute_error_norm(double* ref_v, double* v, int size)
 ////////////////////////////////////////////////////////////////////////////////
 int main(int argc, char **argv) {
 
-  int numCells = 1024;
-  int order = 1;
+  int numCells = 1024 * 8;
+  int order = 6;
   if (argc > 1)
   {
     numCells = std::atoi(argv[1]);

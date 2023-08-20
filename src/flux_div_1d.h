@@ -81,18 +81,16 @@ void flux_div_1d<REFE, FLUX>::apply(ZipItr ins, FItr surf_fluxes, T J, ZipItr ou
     for(std::size_t j = i + 1; j < N; ++j)
       vol_fluxes[i * N + j] = m_flux_op->numerical_volume_flux(*(ins + i), *(ins + j));
 
-    V result = initialize_variable_to_zero<V>();
+    *(out + i) = initialize_variable_to_zero<V>();
     for(std::size_t j = 0; j < N; ++j)
-      result += const_val<T, 2> * D(i, j) * vol_fluxes[i * N + j];
-
-    *(out + i) = result;
+      *(out + i) += const_val<T, 2> * D(i, j) * vol_fluxes[i * N + j];
   }
 
   // plus surface integration lifting
   auto M = m_ref_elem->mass_matrix();
-  *out -= (*surf_fluxes - vol_fluxes[0]) / M(0, 0); // normal direction is minus
+  *out -= (*surf_fluxes - vol_fluxes[0]) / M(0, 0);
   surf_fluxes++;
-  *(out + N - 1) += (*surf_fluxes - vol_fluxes[N * N - 1]) / M(N - 1, N - 1);
+  *(out + N - 1) -= (vol_fluxes[N * N - 1] - *surf_fluxes) / M(N - 1, N - 1);
 
   // divide by J
   T invJ = const_val<T, 1> / J;

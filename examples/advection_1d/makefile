@@ -1,4 +1,4 @@
-DEBUG ?= 1
+#DEBUG ?= 1
 
 SRC_DIR := ../../src
 SRC_MSH_DIR := 
