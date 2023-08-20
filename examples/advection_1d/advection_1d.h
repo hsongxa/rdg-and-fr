@@ -38,7 +38,7 @@ class advection_1d
 {
 public:
   advection_1d(std::size_t numCells, int order)
-    : m_numCells(numCells), m_order(order), m_mesh((T)(-M_PI), (T)(M_PI), numCells) {}
+    : m_numCells(numCells), m_order(order), m_mesh((T)(0), (T)(2. * M_PI), numCells) {}
   ~advection_1d(){}
   
   T wave_speed() const { return s_waveSpeed; }
@@ -129,7 +129,7 @@ void advection_1d<T>::numerical_fluxes(ConstItr cbegin, T t) const
   if (m_numericalFluxes.size() < numFluxes) m_numericalFluxes.resize(numFluxes);
 
   T a, b;
-  int np = m_order + 1; // d.o.f. management !
+  int np = reference_element(m_order).num_nodes();
   for (std::size_t i = 0; i < numFluxes; ++i)
   {
     if (i > 0) a = *(cbegin + (i * np - 1));
@@ -145,13 +145,19 @@ void advection_1d<T>::operator()(ConstItr in_cbegin, std::size_t size, T t, Itr 
 {
   numerical_fluxes(in_cbegin, t);
 
-  rdg::flux_div_1d<reference_element, flux_calculator> divOp{reference_element(m_order), flux_calculator(s_waveSpeed)};
+  reference_element refElem(m_order);
+  flux_calculator fluxCalculator(s_waveSpeed);
+  rdg::flux_div_1d<reference_element, flux_calculator> divOp(refElem, fluxCalculator);
 
+  int np = refElem.num_nodes();
+  std::vector<T> cellOut(np);
   for (std::size_t cell = 0; cell < m_numCells; ++cell)
   {
     auto cellGeom = m_mesh.get_cell(cell);
     T J = mapping_type::J(std::get<0>(cellGeom), std::get<1>(cellGeom));
-    divOp.apply(in_cbegin, m_numericalFluxes.cbegin(), J, out_begin);
+    divOp.apply(in_cbegin + np * cell, m_numericalFluxes.cbegin() + cell, J, cellOut.begin());
+
+    for(int i = 0; i < np; ++i) *(out_begin + np * cell + i) = -cellOut[i];
   }
 }
 
