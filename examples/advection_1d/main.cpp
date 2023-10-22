@@ -96,6 +96,7 @@ int main(int argc, char **argv) {
   file << "#         x         reference solution" << std::endl;
   for(int i = 0; i < numDOFs; ++i)
     file << x[i] << " " << ref_v[i] << std::endl;
+  file.close();
 
   return 0;
 }

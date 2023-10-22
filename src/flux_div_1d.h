@@ -46,8 +46,8 @@ public:
 
   flux_div_1d(const REFE& elem, const FLUX& flux) : m_ref_elem(&elem), m_flux_op(&flux) {}
 
-  template<typename ZipItr, typename FItr>
-  void apply(ZipItr ins, FItr surf_fluxes, T J, ZipItr outs);
+  template<typename ZipItr, typename FItr, typename Itr>
+  void apply(ZipItr ins, FItr surf_fluxes, T J, Itr outs);
 
 private:
   using V = typename FLUX::variable_type;
@@ -60,8 +60,8 @@ private:
 // NOTE: 1) the contravariant basis is a constant scalar and cancels with J (their product is one);
 // NOTE: 2) the face nodes are hard coded to be 0 and num_nodes() - 1; and
 // NOTE: 3) the face mass matrix degenerates to scalar 1
-template<typename REFE, typename FLUX> template<typename ZipItr, typename FItr>
-void flux_div_1d<REFE, FLUX>::apply(ZipItr ins, FItr surf_fluxes, T J, ZipItr out)
+template<typename REFE, typename FLUX> template<typename ZipItr, typename FItr, typename Itr>
+void flux_div_1d<REFE, FLUX>::apply(ZipItr ins, FItr surf_fluxes, T J, Itr outs)
 {
   assert(J > 0);
 
@@ -81,20 +81,20 @@ void flux_div_1d<REFE, FLUX>::apply(ZipItr ins, FItr surf_fluxes, T J, ZipItr ou
     for(std::size_t j = i + 1; j < N; ++j)
       vol_fluxes[i * N + j] = m_flux_op->numerical_volume_flux(*(ins + i), *(ins + j));
 
-    *(out + i) = initialize_variable_to_zero<V>();
+    *(outs + i) = initialize_variable_to_zero<V>();
     for(std::size_t j = 0; j < N; ++j)
-      *(out + i) += const_val<T, 2> * D(i, j) * vol_fluxes[i * N + j];
+      *(outs + i) += const_val<T, 2> * D(i, j) * vol_fluxes[i * N + j];
   }
 
   // plus surface integration lifting
   auto M = m_ref_elem->mass_matrix();
-  *out -= (*surf_fluxes - vol_fluxes[0]) / M(0, 0);
+  *outs -= (*surf_fluxes - vol_fluxes[0]) / M(0, 0);
   surf_fluxes++;
-  *(out + N - 1) -= (vol_fluxes[N * N - 1] - *surf_fluxes) / M(N - 1, N - 1);
+  *(outs + N - 1) -= (vol_fluxes[N * N - 1] - *surf_fluxes) / M(N - 1, N - 1);
 
   // divide by J
   T invJ = const_val<T, 1> / J;
-  for(std::size_t i = 0; i < N; ++i) *(out + i) *= invJ;
+  for(std::size_t i = 0; i < N; ++i) *(outs + i) *= invJ;
 }
 
 }

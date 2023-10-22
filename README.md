@@ -1,5 +1,5 @@
 # rdg-and-fr
-A C++ implementation of the robust discontinuous Galerkin (DG) method and the flux reconstruction schemes. This code focuses on the solution of compressible Euler equations and compressible Navier-Stokes equations in 3D space on unstructured hexahedral meshes, although 1D and 2D problems are also included. The parallelization is done by MPI + OpenMP + CUDA.
+A C++ implementation of the robust discontinuous Galerkin (DG) method and the flux reconstruction schemes. This code focuses on the solution of compressible Euler equations and compressible Navier-Stokes equations in 3D space on unstructured hexahedral meshes, although 1D and 2D problems are also included. The parallelization is done by MPI + CUDA.
 
 Code is under construction.
 

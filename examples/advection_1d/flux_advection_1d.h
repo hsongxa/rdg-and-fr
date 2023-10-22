@@ -25,8 +25,6 @@
 
 #include "const_val.h"
 
-namespace rdg {
-
 template<typename T>
 class flux_advection_1d
 {
@@ -40,7 +38,7 @@ public:
 
   // symmetric
   T numerical_volume_flux(const T& u_a, const T& u_b) const
-  { return m_velocity * (u_a + u_b) / const_val<T, 2>; }
+  { return m_velocity * (u_a + u_b) / rdg::const_val<T, 2>; }
 
   // symmetric part plus stabilization part: upwind
   // NOTE: unit normal vectors of the faces of a 1d element
@@ -48,13 +46,11 @@ public:
   T numerical_surface_flux(const T& u_a, const T& u_b, T sign_a) const
   {
     T jump = sign_a < 0 ? u_b - u_a : u_a - u_b;
-    return numerical_volume_flux(u_a, u_b) + std::fabs(m_velocity) * jump / const_val<T, 2>;
+    return numerical_volume_flux(u_a, u_b) + std::fabs(m_velocity) * jump / rdg::const_val<T, 2>;
   }
 
 private:
   T m_velocity;
 };
-
-}
 
 #endif
