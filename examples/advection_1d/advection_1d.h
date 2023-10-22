@@ -61,6 +61,8 @@ public:
   template<typename ConstItr, typename Itr>
   void operator()(ConstItr in_cbegin, std::size_t size, T t, Itr out_begin) const;
 
+  using variable_type = T;
+
 private:
   template<typename ConstItr>
   void numerical_fluxes(ConstItr cbegin, T t) const; // time t is used for boundary conditions
@@ -69,7 +71,7 @@ private:
   using mesh_type         = rdg::uniform_cartesian_mesh_1d<T>;
   using mapping_type      = rdg::mapping_segment;
   using reference_element = rdg::reference_segment<T>;
-  using flux_calculator   = rdg::flux_advection_1d<T>;
+  using flux_calculator   = flux_advection_1d<T>;
 
   // numerical scheme data (could be constants if never change)
   std::size_t m_numCells;
