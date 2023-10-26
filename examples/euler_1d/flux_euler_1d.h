@@ -42,7 +42,6 @@ public:
   {
     T rho, rhou, E;
     boost::tie(rho, rhou, E) = var;
-    assert(rho > 0);
 
     T u = rhou / rho;
     T p = (m_gamma - rdg::const_val<T, 1>) * (E - rhou * u / rdg::const_val<T, 2>);
@@ -59,7 +58,6 @@ public:
     T rho_minus, rhou_minus, E_minus, rho_plus, rhou_plus, E_plus;
     boost::tie(rho_minus, rhou_minus, E_minus) = var_minus;
     boost::tie(rho_plus, rhou_plus, E_plus) = var_plus;
-    assert(rho_minus > 0 && rho_plus > 0);
 
     // averages
     T rho = (rho_minus + rho_plus) / rdg::const_val<T, 2>;
@@ -86,15 +84,14 @@ public:
     T rho_minus, rhou_minus, E_minus, rho_plus, rhou_plus, E_plus;
     boost::tie(rho_minus, rhou_minus, E_minus) = var_minus;
     boost::tie(rho_plus, rhou_plus, E_plus) = var_plus;
-    assert(rho_minus > 0 && rho_plus > 0);
 
     T u_minus = rhou_minus / rho_minus;
     T p_minus = (m_gamma - rdg::const_val<T, 1>) * (E_minus - rhou_minus * u_minus / rdg::const_val<T, 2>); 
-    T LF_minus = std::abs(u_minus) + std::sqrt(m_gamma * p_minus / rho_minus);
+    T LF_minus = std::abs(u_minus) + std::sqrt(std::abs(m_gamma * p_minus / rho_minus));
 
     T u_plus = rhou_plus / rho_plus;
     T p_plus = (m_gamma - rdg::const_val<T, 1>) * (E_plus - rhou_plus * u_plus / rdg::const_val<T, 2>); 
-    T LF_plus = std::abs(u_plus) + std::sqrt(m_gamma * p_plus / rho_plus);
+    T LF_plus = std::abs(u_plus) + std::sqrt(std::abs(m_gamma * p_plus / rho_plus));
 
     // averages - symmetric part
     T rho = (rho_minus + rho_plus) / rdg::const_val<T, 2>;

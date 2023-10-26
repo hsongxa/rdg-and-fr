@@ -36,7 +36,7 @@
 int main(int argc, char **argv) {
 
   int numCells = 1024;
-  int order = 1;
+  int order = 2;
   if (argc > 1)
   {
     numCells = std::atoi(argv[1]);
@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
   auto var5Itr = boost::make_zip_iterator(boost::make_tuple(d5.begin(), m5.begin(), e5.begin()));
 
   // time advancing loop
-  int maxNumTS = 100;
+  int maxNumTS = 10000;
   double T = 0.2;
   double t = 0.0;
   double dt = op.timestep_size(varItr);
@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
 
   // output to visualize
   std::ofstream file;
-  file.open("ShockDensityWaveProblem.txt");
+  file.open("SodShockTubeProblem.txt");
   file.precision(std::numeric_limits<double>::digits10);
   file << "#         x         rho" << std::endl;
   for(int i = 0; i < numNodes; ++i)

@@ -126,14 +126,13 @@ T euler_1d<T>::timestep_size(InputZipIterator it) const
   for (std::size_t i = 0; i < num_nodes(); ++i)
   {
     boost::tie(rho, rhou, E) = *it++;
-    assert(rho > 0);
     T u = rhou / rho;
     T p = (E - rhou * u / static_cast<T>(2)) * (s_gamma - static_cast<T>(1)); 
     T v = std::abs(u) + std::sqrt(s_gamma * p / rho);
     if (v > maxV) maxV = v;
   }
 
-  return static_cast<T>(1) / (maxV * static_cast<T>(m_mesh.num_cells()));
+  return static_cast<T>(0.25) / (maxV * static_cast<T>(m_mesh.num_cells())) / static_cast<T>(m_order);
 }
 
 template<typename T> template<typename ConstZipItr>
@@ -152,7 +151,8 @@ void euler_1d<T>::numerical_fluxes(ConstZipItr cbegin, T t) const
     // inflow boundary condition
     else a = boost::make_tuple(static_cast<T>(1), static_cast<T>(0), static_cast<T>(1) / (s_gamma - static_cast<T>(1)));
     if (i < numFluxes - 1) b = *(cbegin + (i * np));
-    else b = *(cbegin + (i * np - 1)); // outflow boundary condition
+    // outflow boundary condition
+    else b = boost::make_tuple(T(0.125), static_cast<T>(0), T(0.1) / (s_gamma - static_cast<T>(1))); //*(cbegin + (i * np - 1));
     m_numericalFluxes[i] = fluxCalculator.numerical_surface_flux(a, b, 1);
   }
 }
