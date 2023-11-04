@@ -30,7 +30,7 @@
 #include "mapping_segment.h"
 #include "reference_segment.h"
 #include "flux_advection_1d.h"
-#include "flux_div_1d.h"
+#include "convective_flux_div_1d.h"
 
 // host code of the problem of linear advection equation in one dimensional space
 template<typename T>
@@ -149,7 +149,7 @@ void advection_1d<T>::operator()(ConstItr in_cbegin, std::size_t size, T t, Itr 
 
   reference_element refElem(m_order);
   flux_calculator fluxCalculator(s_waveSpeed);
-  rdg::flux_div_1d<reference_element, flux_calculator> divOp(refElem, fluxCalculator);
+  rdg::convective_flux_div_1d<reference_element, flux_calculator> divOp(refElem, fluxCalculator);
 
   int np = refElem.num_nodes();
   std::vector<T> cellOut(np);

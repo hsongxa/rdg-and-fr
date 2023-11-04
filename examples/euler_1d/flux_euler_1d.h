@@ -28,6 +28,7 @@
 #include <boost/tuple/tuple.hpp>
 
 #include "const_val.h"
+#include "logarithmic_mean.h"
 
 template<typename T>
 class flux_euler_1d
@@ -49,70 +50,152 @@ public:
     return boost::make_tuple(rhou, rhou * u + p, (E + p) * u);
   }
 
-  // see the KG flux in the paper "Split Form Nodal Discontinuous Galerkin
-  // Schemes with Summation-By-Parts Property for the Compressible Euler
-  // Equations" by G.J. Gassner, A.R. Winters, and D. Kopriva, 2016
   variable_type numerical_volume_flux(const variable_type& var_minus,
-                                      const variable_type& var_plus) const
-  {
-    T rho_minus, rhou_minus, E_minus, rho_plus, rhou_plus, E_plus;
-    boost::tie(rho_minus, rhou_minus, E_minus) = var_minus;
-    boost::tie(rho_plus, rhou_plus, E_plus) = var_plus;
+                                      const variable_type& var_plus) const;
 
-    // averages
-    T rho = (rho_minus + rho_plus) / rdg::const_val<T, 2>;
-
-    T u_minus = rhou_minus / rho_minus;
-    T u_plus = rhou_plus / rho_plus;
-    T u = (u_minus + u_plus) / rdg::const_val<T, 2>;
-
-    T p_minus = (m_gamma - rdg::const_val<T, 1>) * (E_minus - rhou_minus * u_minus / rdg::const_val<T, 2>);
-    T p_plus = (m_gamma - rdg::const_val<T, 1>) * (E_plus - rhou_plus * u_plus / rdg::const_val<T, 2>);
-    T p = (p_minus + p_plus) / rdg::const_val<T, 2>;
-
-    T e = (E_minus / rho_minus + E_plus / rho_plus) / rdg::const_val<T, 2>;
-
-    return boost::make_tuple(rho * u, rho * u * u + p, (rho * e + p) * u);
-  }
-
-  // symmetric part plus stabilization part
-  // NOTE: unit normal vectors of the faces of a 1d element
-  // NOTE: degenerate to a sign, i.e., -1 or +1
   variable_type numerical_surface_flux(const variable_type& var_minus,
-                                       const variable_type& var_plus, T sign_minus) const
-  {
-    T rho_minus, rhou_minus, E_minus, rho_plus, rhou_plus, E_plus;
-    boost::tie(rho_minus, rhou_minus, E_minus) = var_minus;
-    boost::tie(rho_plus, rhou_plus, E_plus) = var_plus;
-
-    T u_minus = rhou_minus / rho_minus;
-    T p_minus = (m_gamma - rdg::const_val<T, 1>) * (E_minus - rhou_minus * u_minus / rdg::const_val<T, 2>); 
-    T LF_minus = std::abs(u_minus) + std::sqrt(std::abs(m_gamma * p_minus / rho_minus));
-
-    T u_plus = rhou_plus / rho_plus;
-    T p_plus = (m_gamma - rdg::const_val<T, 1>) * (E_plus - rhou_plus * u_plus / rdg::const_val<T, 2>); 
-    T LF_plus = std::abs(u_plus) + std::sqrt(std::abs(m_gamma * p_plus / rho_plus));
-
-    // averages - symmetric part
-    T rho = (rho_minus + rho_plus) / rdg::const_val<T, 2>;
-    T u = (u_minus + u_plus) / rdg::const_val<T, 2>;
-    T p = (p_minus + p_plus) / rdg::const_val<T, 2>;
-    T e = (E_minus / rho_minus + E_plus / rho_plus) / rdg::const_val<T, 2>;
-
-    // jumps for the stabilization part
-    T jump_rho = sign_minus < 0 ? rho_plus - rho_minus : rho_minus - rho_plus;
-    T jump_rhou = sign_minus < 0 ? rhou_plus - rhou_minus : rhou_minus - rhou_plus;
-    T jump_E = sign_minus < 0 ? E_plus - E_minus : E_minus - E_plus;
-
-    // local Lax-Friedrichs flux
-    T LF = LF_minus > LF_plus ? LF_minus / rdg::const_val<T, 2> : LF_plus / rdg::const_val<T, 2>;
-    return boost::make_tuple(rho * u + LF * jump_rho,
-                             rho * u * u + p + LF * jump_rhou,
-                             (rho * e + p) * u + LF * jump_E);
-  }
-
+                                       const variable_type& var_plus, T sign_minus) const;
 private:
   T m_gamma;
 };
+
+// see the Chandrashekar flux in the paper "Split Form Nodal Discontinuous Galerkin
+// Schemes with Summation-By-Parts Property for the Compressible Euler Equations"
+// by G.J. Gassner, A.R. Winters, and D. Kopriva, 2016
+template<typename T>
+typename flux_euler_1d<T>::variable_type flux_euler_1d<T>::numerical_volume_flux(
+  const variable_type& var_minus, const variable_type& var_plus) const
+{
+  T rho_minus, rhou_minus, E_minus, rho_plus, rhou_plus, E_plus;
+  boost::tie(rho_minus, rhou_minus, E_minus) = var_minus;
+  boost::tie(rho_plus, rhou_plus, E_plus) = var_plus;
+
+  // averages
+  T rho = rdg::logarithmic_mean(rho_minus, rho_plus);
+
+  T u_minus = rhou_minus / rho_minus;
+  T u_plus = rhou_plus / rho_plus;
+  T u = (u_minus + u_plus) / rdg::const_val<T, 2>;
+
+  T p_minus = (m_gamma - rdg::const_val<T, 1>) * (E_minus - rhou_minus * u_minus / rdg::const_val<T, 2>);
+  T p_plus = (m_gamma - rdg::const_val<T, 1>) * (E_plus - rhou_plus * u_plus / rdg::const_val<T, 2>);
+  T beta_minus = rho_minus / (rdg::const_val<T, 2> * p_minus);
+  T beta_plus = rho_plus / (rdg::const_val<T, 2> * p_plus);
+  T p = (rho_minus + rho_plus) / (rdg::const_val<T, 2> * (beta_minus + beta_plus));
+
+  T beta_inv = rdg::inverse_logarithmic_mean(beta_minus, beta_plus);
+  T H = beta_inv / (rdg::const_val<T, 2> * (m_gamma - rdg::const_val<T, 1>)) + p / rho + u * u / rdg::const_val<T, 2>;
+
+  return boost::make_tuple(rho * u, rho * u * u + p, rho * u * H);
+}
+
+// symmetric part plus stabilization part
+// NOTE: unit normal vectors of the faces of a 1d element
+// NOTE: degenerate to a sign, i.e., -1 or +1
+template<typename T>
+typename flux_euler_1d<T>::variable_type flux_euler_1d<T>::numerical_surface_flux(
+  const variable_type& var_minus, const variable_type& var_plus, T sign_minus) const
+{
+  T rho_minus, rhou_minus, E_minus, rho_plus, rhou_plus, E_plus;
+  boost::tie(rho_minus, rhou_minus, E_minus) = var_minus;
+  boost::tie(rho_plus, rhou_plus, E_plus) = var_plus;
+
+  T u_minus = rhou_minus / rho_minus;
+  T p_minus = (m_gamma - rdg::const_val<T, 1>) * (E_minus - rhou_minus * u_minus / rdg::const_val<T, 2>); 
+  T LF_minus = std::abs(u_minus) + std::sqrt(std::abs(m_gamma * p_minus / rho_minus));
+
+  T u_plus = rhou_plus / rho_plus;
+  T p_plus = (m_gamma - rdg::const_val<T, 1>) * (E_plus - rhou_plus * u_plus / rdg::const_val<T, 2>); 
+  T LF_plus = std::abs(u_plus) + std::sqrt(std::abs(m_gamma * p_plus / rho_plus));
+
+  // averages - symmetric part
+  T rho = rdg::logarithmic_mean(rho_minus, rho_plus);
+  T u = (u_minus + u_plus) / rdg::const_val<T, 2>;
+  T beta_minus = rho_minus / (rdg::const_val<T, 2> * p_minus);
+  T beta_plus = rho_plus / (rdg::const_val<T, 2> * p_plus);
+  T p = (rho_minus + rho_plus) / (rdg::const_val<T, 2> * (beta_minus + beta_plus));
+  T beta_inv = rdg::inverse_logarithmic_mean(beta_minus, beta_plus);
+  T H = beta_inv / (rdg::const_val<T, 2> * (m_gamma - rdg::const_val<T, 1>)) + p / rho + u * u / rdg::const_val<T, 2>;
+
+  // jumps for the stabilization part
+  T jump_rho = sign_minus < 0 ? rho_plus - rho_minus : rho_minus - rho_plus;
+  T jump_rhou = sign_minus < 0 ? rhou_plus - rhou_minus : rhou_minus - rhou_plus;
+  T jump_E = sign_minus < 0 ? E_plus - E_minus : E_minus - E_plus;
+
+  // local Lax-Friedrichs flux
+  T LF = LF_minus > LF_plus ? LF_minus / rdg::const_val<T, 2> : LF_plus / rdg::const_val<T, 2>;
+  return boost::make_tuple(rho * u + LF * jump_rho,
+                           rho * u * u + p + LF * jump_rhou,
+                           rho * u * H + LF * jump_E);
+}
+
+/* NOTE: The following is KG flux implementation, which also works, but
+         the Chandrashekar flux implemented above can be entropy stable.
+
+// see the KG flux in the paper "Split Form Nodal Discontinuous Galerkin
+// Schemes with Summation-By-Parts Property for the Compressible Euler
+// Equations" by G.J. Gassner, A.R. Winters, and D. Kopriva, 2016
+template<typename T>
+typename flux_euler_1d<T>::variable_type flux_euler_1d<T>::numerical_volume_flux(
+  const variable_type& var_minus, const variable_type& var_plus) const
+{
+  T rho_minus, rhou_minus, E_minus, rho_plus, rhou_plus, E_plus;
+  boost::tie(rho_minus, rhou_minus, E_minus) = var_minus;
+  boost::tie(rho_plus, rhou_plus, E_plus) = var_plus;
+
+  // averages
+  T rho = (rho_minus + rho_plus) / rdg::const_val<T, 2>;
+
+  T u_minus = rhou_minus / rho_minus;
+  T u_plus = rhou_plus / rho_plus;
+  T u = (u_minus + u_plus) / rdg::const_val<T, 2>;
+
+  T p_minus = (m_gamma - rdg::const_val<T, 1>) * (E_minus - rhou_minus * u_minus / rdg::const_val<T, 2>);
+  T p_plus = (m_gamma - rdg::const_val<T, 1>) * (E_plus - rhou_plus * u_plus / rdg::const_val<T, 2>);
+  T p = (p_minus + p_plus) / rdg::const_val<T, 2>;
+
+  T e = (E_minus / rho_minus + E_plus / rho_plus) / rdg::const_val<T, 2>;
+
+  return boost::make_tuple(rho * u, rho * u * u + p, (rho * e + p) * u);
+}
+
+// symmetric part plus stabilization part
+// NOTE: unit normal vectors of the faces of a 1d element
+// NOTE: degenerate to a sign, i.e., -1 or +1
+template<typename T>
+typename flux_euler_1d<T>::variable_type flux_euler_1d<T>::numerical_surface_flux(
+  const variable_type& var_minus, const variable_type& var_plus, T sign_minus) const
+{
+  T rho_minus, rhou_minus, E_minus, rho_plus, rhou_plus, E_plus;
+  boost::tie(rho_minus, rhou_minus, E_minus) = var_minus;
+  boost::tie(rho_plus, rhou_plus, E_plus) = var_plus;
+
+  T u_minus = rhou_minus / rho_minus;
+  T p_minus = (m_gamma - rdg::const_val<T, 1>) * (E_minus - rhou_minus * u_minus / rdg::const_val<T, 2>); 
+  T LF_minus = std::abs(u_minus) + std::sqrt(std::abs(m_gamma * p_minus / rho_minus));
+
+  T u_plus = rhou_plus / rho_plus;
+  T p_plus = (m_gamma - rdg::const_val<T, 1>) * (E_plus - rhou_plus * u_plus / rdg::const_val<T, 2>); 
+  T LF_plus = std::abs(u_plus) + std::sqrt(std::abs(m_gamma * p_plus / rho_plus));
+
+  // averages - symmetric part
+  T rho = (rho_minus + rho_plus) / rdg::const_val<T, 2>;
+  T u = (u_minus + u_plus) / rdg::const_val<T, 2>;
+  T p = (p_minus + p_plus) / rdg::const_val<T, 2>;
+  T e = (E_minus / rho_minus + E_plus / rho_plus) / rdg::const_val<T, 2>;
+
+  // jumps for the stabilization part
+  T jump_rho = sign_minus < 0 ? rho_plus - rho_minus : rho_minus - rho_plus;
+  T jump_rhou = sign_minus < 0 ? rhou_plus - rhou_minus : rhou_minus - rhou_plus;
+  T jump_E = sign_minus < 0 ? E_plus - E_minus : E_minus - E_plus;
+
+  // local Lax-Friedrichs flux
+  T LF = LF_minus > LF_plus ? LF_minus / rdg::const_val<T, 2> : LF_plus / rdg::const_val<T, 2>;
+  return boost::make_tuple(rho * u + LF * jump_rho,
+                           rho * u * u + p + LF * jump_rhou,
+                           (rho * e + p) * u + LF * jump_E);
+}
+
+*/
 
 #endif
