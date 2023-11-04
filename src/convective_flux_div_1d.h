@@ -18,8 +18,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  **/
 
-#ifndef FLUX_DIV_1D
-#define FLUX_DIV_1D 
+#ifndef CONVECTIVE_FLUX_DIV_1D
+#define CONVECTIVE_FLUX_DIV_1D 
 
 #include <cassert>
 #include <vector>
@@ -31,20 +31,20 @@
 
 namespace rdg {
 
-// element-wise calculations of flux divergence in one dimensional space
+// element-wise calculations of divergence of convective flux in one dimensional space
 //
 // NOTE: Different from div_1d which calculates divergence of the input
 // NOTE: variable at their locations, flux_div_1d calculates divergence
 // NOTE: of the flux function of the input variable at collocations of
 // NOTE: the variable, i.e., no over-integration is used thanks to the
-// NOTE: robust DG schemes.
+// NOTE: robust DG schemes with flux differencing.
 template<typename REFE, typename FLUX> // REFE - 1D reference element 
-class flux_div_1d                      // FLUX - flux calculators and associated types
+class convective_flux_div_1d                      // FLUX - flux calculators and associated types
 {
 public:
   using T = typename FLUX::value_type;
 
-  flux_div_1d(const REFE& elem, const FLUX& flux) : m_ref_elem(&elem), m_flux_op(&flux) {}
+  convective_flux_div_1d(const REFE& elem, const FLUX& flux) : m_ref_elem(&elem), m_flux_op(&flux) {}
 
   template<typename ZipItr, typename FItr, typename Itr>
   void apply(ZipItr ins, FItr surf_fluxes, T J, Itr outs);
@@ -61,7 +61,7 @@ private:
 // NOTE: 2) the face nodes are hard coded to be 0 and num_nodes() - 1; and
 // NOTE: 3) the face mass matrix degenerates to scalar 1
 template<typename REFE, typename FLUX> template<typename ZipItr, typename FItr, typename Itr>
-void flux_div_1d<REFE, FLUX>::apply(ZipItr ins, FItr surf_fluxes, T J, Itr outs)
+void convective_flux_div_1d<REFE, FLUX>::apply(ZipItr ins, FItr surf_fluxes, T J, Itr outs)
 {
   assert(J > 0);
 

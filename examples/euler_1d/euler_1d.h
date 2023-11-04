@@ -37,7 +37,7 @@
 #include "mapping_segment.h"
 #include "reference_segment.h"
 #include "flux_euler_1d.h"
-#include "flux_div_1d.h"
+#include "convective_flux_div_1d.h"
 
 
 // host code of the problem of euler equation in one dimensional space
@@ -164,7 +164,7 @@ void euler_1d<T>::operator()(ConstZipItr in_cbegin, std::size_t size, T t, ZipIt
 
   reference_element refElem(m_order);
   flux_calculator fluxCalculator(s_gamma);
-  rdg::flux_div_1d<reference_element, flux_calculator> divOp(refElem, fluxCalculator);
+  rdg::convective_flux_div_1d<reference_element, flux_calculator> divOp(refElem, fluxCalculator);
 
   int np = refElem.num_nodes();
   std::vector<variable_type> cellOut(np);
