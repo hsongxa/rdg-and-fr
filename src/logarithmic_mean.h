@@ -36,8 +36,7 @@ T logarithmic_mean(const T& a, const T& b)
 {
   assert(a > 0 && b > 0);
   T u = (a * (a - const_val<T, 2> * b) + b * b) / (a * (a + const_val<T, 2> * b) + b * b);
-  T epsilon = const_val<T, 1> / const_val<T, 10000>;
-  return u < epsilon ?
+  return u < const_val<T, 1> / const_val<T, 10000> ?
          (a + b) / (const_val<T, 2> + u * (const_val<T, 2> / const_val<T, 3> +
          u * (const_val<T, 2> / const_val<T, 5> + u * const_val<T, 2> / const_val<T, 7>))) :
          (b - a) / std::log(b / a);
@@ -51,8 +50,7 @@ T inverse_logarithmic_mean(const T& a, const T& b)
 {
   assert(a > 0 && b > 0);
   T u = (a * (a - const_val<T, 2> * b) + b * b) / (a * (a + const_val<T, 2> * b) + b * b);
-  T epsilon = const_val<T, 1> / const_val<T, 10000>;
-  return u < epsilon ?
+  return u < const_val<T, 1> / const_val<T, 10000> ?
          (const_val<T, 2> + u * (const_val<T, 2> / const_val<T, 3> +
          u * (const_val<T, 2> / const_val<T, 5> + u * const_val<T, 2> / const_val<T, 7>))) / (a + b) :
          std::log(b / a) / (b - a);
